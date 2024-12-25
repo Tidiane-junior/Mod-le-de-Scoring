@@ -9,7 +9,7 @@ model = joblib.load('lgb_model.pkl')
 # Initialiser FastAPI
 app = FastAPI()
 
-# Définir la structure des données d'entrée (ceci doit correspondre aux features du modèle)
+# Définir la structure des données d'entrée
 class InputData(BaseModel):
     EXT_SOURCE_2: float
     DAYS_BIRTH: int
