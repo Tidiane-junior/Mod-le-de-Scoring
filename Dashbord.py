@@ -45,7 +45,13 @@ with col2:
 
 # --- Sidebar pour informations supplémentaires ---
 st.sidebar.title("À propos du tableau de bord")
-
+st.write(" ")
+st.sidebar.write(
+    """
+    **Auteur :** [Ch. Tidiane THIAM](https://www.linkedin.com/in/cheikh-tid-thiam)
+    """
+    )
+st.write(" ")
 st.sidebar.write(
         """
         Ce tableau de bord de scoring permet :
