@@ -1,20 +1,16 @@
-import pandas as pd
-import numpy as np
 import streamlit as st
-import plotly.express as px
 import requests
 
 st.set_page_config(
     layout='wide',
     initial_sidebar_state='expanded',
-    page_title="Accueil")
+    page_title="Accueil avec API Cloud")
 
 # --- Initialisation de SessionState ---
 if "load_state" not in st.session_state:
     st.session_state.load_state = False
 
 # --- Layout de la page d'accueil ---
-# Tableau de bord Streamlit
 st.title('Tableau de bord - Credit Scoring')
 st.subheader('Application d\'aide à la décision de prêt')
 st.write("""Cette application assiste l'agent de prêt dans sa décision d'accorder un prêt à un client.
@@ -46,12 +42,13 @@ with col2:
 # --- Sidebar pour informations supplémentaires ---
 st.sidebar.title("À propos du tableau de bord")
 st.write(" ")
+# auteur 
 st.sidebar.write(
     """
     **Auteur :** [Ch. Tidiane THIAM](https://www.linkedin.com/in/cheikh-tid-thiam)
     """
     )
-st.write(" ")
+
 st.sidebar.write(
         """
         Ce tableau de bord de scoring permet :
@@ -60,94 +57,17 @@ st.sidebar.write(
         - D'analyser les caractéristiques des clients.
         - De prédire le défaut de remboursement pour un nouveau client.
 
-        Les données utilisées sont issues de la compétition Kaggle "Home Credit Default Risk".
         """
         )
 
-# --- Chargement des données ---
-# Chargement des données avec pickle
-@st.cache_data
-def load_data(file_path):
-    """Chargement des données avec pickle."""
-    return pd.read_pickle(file_path)
+# URL de l'API déployée sur le cloud
+api_url = "https://fastapi-image-71943282713.europe-west9.run.app/predict/"
 
-# Fonction d'analyse exploratoire
-def perform_eda(df):
-    '''
-    Réalise une analyse exploratoire sur le DataFrame et génère une visualisation.
-
-    Entrée :
-        df : DataFrame contenant les données.
-    Sortie :
-        fig : Figure Plotly affichant les défauts de remboursement par tranche d'âge.
-    '''
-    # Copier le DataFrame pour éviter de modifier l'original
-    df_copy = df.copy()
-
-    # Informations sur l'âge dans un DataFrame séparé
-    age_data = df_copy[['TARGET', 'DAYS_BIRTH']]
-
-    # Ajouter une colonne contenant l'âge en années
-    age_data['YEARS_BIRTH'] = age_data['DAYS_BIRTH'] / -365
-
-    # Diviser les données d'âge par intervalles de 5 ans
-    age_data['YEARS_BINNED'] = pd.cut(age_data['YEARS_BIRTH'], bins = np.linspace(20, 70, num = 11))
-
-    # Regrouper les données par tranches d'âge et calculer les moyennes pour chaque tranche d'âge
-    age_groups = age_data.groupby('YEARS_BINNED').mean()
-
-   # On réinitialise l'index pour rendre YEARS_BINNED une colonne
-    age_groups_reset = age_groups.reset_index()
-    # Convertir les tranches d'âge en chaînes pour les utiliser comme catégories
-    age_groups_reset['YEARS_BINNED'] = age_groups_reset['YEARS_BINNED'].astype(str)
-
-    # Visualisation
-    fig = px.bar(
-        age_groups_reset,
-        x='YEARS_BINNED',  # Tranches d'âge
-        y='TARGET',        # Moyenne du taux de défaut
-        text='TARGET',     # Afficher les valeurs sur les barres
-        labels={'TARGET': "Défaut de remboursement (%)', 'YEARS_BINNED': 'Tranche d'âge (années)"},
-        title="Défaut de remboursement par tranche d'âge"
-    )
-
-    # Modifier les valeurs pour afficher le pourcentage
-    fig.update_traces(texttemplate='%{text:.2%}', textposition='outside', marker_color='lightskyblue')
-    fig.update_yaxes(tickformat=".0%", title_text="Défaut de remboursement (%)")
-    fig.update_layout(xaxis_title="Tranche d'âge (années)", title_x=0.5)
-
-    return fig
-
-
-# Chargement des données
-file_path = 'train_red_format.pkl'
-try:
-    st.subheader("Chargement des données")
-    df = load_data(file_path)
-    st.success("Données chargées avec succès !") # Affichage d'un message de succès
-    st.write("Aperçu des données :")
-    st.write(df.head())
-    st.text("Informations sur le DataFrame :")
-    buffer = df.info(buf=None)  # Affichage des informations
-    st.text(buffer)
-except Exception as e:
-    st.error(f"Erreur lors du chargement des données : {e}")
-
-# Analyse exploratoire
-if st.checkbox("Effectuer une analyse exploratoire (EDA)"):
-    st.subheader("Analyse exploratoire des données")
-    try:
-        fig = perform_eda(df)
-        st.plotly_chart(fig)
-    except Exception as e:
-        st.error(f"Erreur lors de l'analyse exploratoire : {e}")
-
-
-# --- Formulaire principal pour les entrées utilisateur ---
+# --- # Interface utilisateur pour entrer les données ---
 st.subheader("Prédiction du défaut de remboursement")
 st.write("Veuillez entrer les caractéristiques du client.")
 
-# Collecte des entrées utilisateur
+# Reseigner les données du client
 EXT_SOURCE_2 = st.number_input('Valeur de EXT_SOURCE_2'
                                , min_value=0.0, value=0.5, step=0.01)
 
@@ -169,9 +89,10 @@ bureau_CREDIT_ACTIVE_Closed_mean = st.number_input('Proportion moyenne des créd
 CODE_GENDER_M = st.number_input('Code genre (1 pour homme, 0 pour femme)', min_value=0, max_value=1, value=0, step=1)
 bureau_CREDIT_ACTIVE_Active_mean = st.number_input('Proportion moyenne des crédits actifs', min_value=0.0, max_value=1.0, value=0.5, step=0.01)
 
-# Envoi des données à l'API
-if st.button('Prédire'):
-    data = {
+# Appel de l'API lorsque l'agent clique sur le bouton "Prédire"
+if st.button("Prédire"):
+    # Préparation des données d'entrée pour l'API
+    input_data = {
         "EXT_SOURCE_2": EXT_SOURCE_2,
         "DAYS_BIRTH": DAYS_BIRTH,
         "EXT_SOURCE_3": EXT_SOURCE_3,
@@ -183,19 +104,14 @@ if st.button('Prédire'):
         "CODE_GENDER_M": CODE_GENDER_M,
         "bureau_CREDIT_ACTIVE_Active_mean": bureau_CREDIT_ACTIVE_Active_mean,
     }
-# lien cloud : https://fastapi-image-71943282713.europe-west9.run.app/predict
-# lien local : http://127.0.0.1:8000/predict
-    try:
-        # Requeter mon API
-        response = requests.post("http://127.0.0.1:8002/predict", json=data)
-        if response.status_code == 200:
-            result = response.json()
-            st.success(f"Prédiction : {result['prediction']}")
-            st.info(f"Probabilité : {result['probability']:.2f}")
-        else:
-            st.error(f"Erreur {response.status_code} : {response.text}")
-    #         st.write(f"Résultat de la prédiction : {result['prediction']}")
-    #     else:
-    #         st.write(f"Erreur {response.status_code} : {response.text}")
-    except requests.exceptions.RequestException as e:
-        st.write(f"Erreur de connexion à l'API : {e}")
+
+    # Envoie d'une requête POST à l'API
+    response = requests.post(api_url, json=input_data)
+
+    # Gérer la réponse de l'API
+    if response.status_code == 200:
+        result = response.json()
+        st.success(f"Prédiction : {result['prediction']}")
+        st.info(f"Probabilité : {result['probability']:.2f}")
+    else:
+        st.error(f"Erreur {response.status_code} : {response.text}")
