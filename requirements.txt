@@ -1,6 +1,8 @@
 fastapi
 uvicorn
-python -multipart
-pydantic
-numpy
 joblib
+numpy
+pandas
+scikit-learn==1.4.1.post1
+lightgbm
+pydantic

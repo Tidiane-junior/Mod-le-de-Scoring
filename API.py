@@ -41,7 +41,7 @@ def predict(input_data: InputData):
     # Retourner la prédiction et la probabilité
     return {"prediction": int(prediction[0]), "probability": float(proba[0])}
 
-# Lancer l'API avec uvicorn main:app --reload
+# Lancer l'API avec uvicorn API:app --reload
 # Exemple d'utilisation avec json:
 # {
 #   "EXT_SOURCE_2": 0.5,

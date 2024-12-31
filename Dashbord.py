@@ -183,10 +183,11 @@ if st.button('Prédire'):
         "CODE_GENDER_M": CODE_GENDER_M,
         "bureau_CREDIT_ACTIVE_Active_mean": bureau_CREDIT_ACTIVE_Active_mean,
     }
-
+# lien cloud : https://fastapi-image-71943282713.europe-west9.run.app/predict
+# lien local : http://127.0.0.1:8000/predict
     try:
         # Assurez-vous que l'URL correspond à l'endpoint `/predict`
-        response = requests.post("http://127.0.0.1:8000/predict", json=data)
+        response = requests.post("https://fastapi-image-71943282713.europe-west9.run.app/predict/", json=data)
         if response.status_code == 200:
             result = response.json()
             st.write(f"Résultat de la prédiction : {result['prediction']}")
