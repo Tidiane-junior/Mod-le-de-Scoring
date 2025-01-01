@@ -163,11 +163,20 @@ bureau_DAYS_CREDIT_max = st.number_input('Durée maximale des crédits précéde
 bureau_DAYS_CREDIT_min = st.number_input('Durée minimale des crédits précédents (en jours)'
                                          , min_value=-5000.0, value=-1500.0, step=100.0)
 
-bureau_DAYS_CREDIT_UPDATE_mean = st.number_input('Moyenne des mises à jour des crédits (en jours)', min_value=-5000.0, value=-500.0, step=100.0)
-bureau_DAYS_CREDIT_mean = st.number_input('Durée moyenne des crédits précédents (en jours)', min_value=-5000.0, value=-1000.0, step=100.0)
-bureau_CREDIT_ACTIVE_Closed_mean = st.number_input('Proportion moyenne des crédits fermés', min_value=0.0, max_value=1.0, value=0.5, step=0.01)
-CODE_GENDER_M = st.number_input('Code genre (1 pour homme, 0 pour femme)', min_value=0, max_value=1, value=0, step=1)
-bureau_CREDIT_ACTIVE_Active_mean = st.number_input('Proportion moyenne des crédits actifs', min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+bureau_DAYS_CREDIT_UPDATE_mean = st.number_input('Moyenne des mises à jour des crédits (en jours)'
+                                                 , min_value=-5000.0, value=-500.0, step=100.0)
+
+bureau_DAYS_CREDIT_mean = st.number_input('Durée moyenne des crédits précédents (en jours)'
+                                          , min_value=-5000.0, value=-1000.0, step=100.0)
+
+bureau_CREDIT_ACTIVE_Closed_mean = st.number_input('Proportion moyenne des crédits fermés'
+                                                   , min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+
+CODE_GENDER_M = st.number_input('Code genre (1 pour homme, 0 pour femme)'
+                                , min_value=0, max_value=1, value=0, step=1)
+
+bureau_CREDIT_ACTIVE_Active_mean = st.number_input('Proportion moyenne des crédits actifs'
+                                                   , min_value=0.0, max_value=1.0, value=0.5, step=0.01)
 
 # Envoi des données à l'API
 if st.button('Prédire'):
